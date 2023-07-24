@@ -1,4 +1,5 @@
 pub mod aabb;
+pub mod aarect;
 pub mod bvh;
 pub mod camera;
 pub mod color;
@@ -7,6 +8,7 @@ pub mod hittable_list;
 pub mod material;
 pub mod perlin;
 pub mod ray;
+pub mod rtw;
 pub mod sphere;
 pub mod texture;
 pub mod vec3;

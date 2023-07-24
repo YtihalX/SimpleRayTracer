@@ -27,29 +27,28 @@ impl HittableList {
         self.objects.push(object);
     }
 
-    pub fn ray_color(&mut self, r: Ray, depth: usize) -> Color {
+    pub fn ray_color(&mut self, r: Ray, background: &Color, depth: usize) -> Color {
         if depth == 0 {
             return Color::default();
         }
         let mut rec = HitRecord::default();
-        if self.hit(&r, 0.001, f64::INFINITY, &mut rec) {
-            match rec.mat_ptr.as_ref() {
-                Some(p) => {
-                    let mut attenuation = Vec3::default();
-                    let mut scattered = Ray::new(Point3::default(), Vec3::default(), 0f64);
-                    if p.scatter(&r, &rec, &mut self.rng, &mut attenuation, &mut scattered) {
-                        return attenuation * self.ray_color(scattered, depth - 1);
-                    }
-                    return Color::default();
+        if !self.hit(&r, 0.001, f64::INFINITY, &mut rec) {
+            return *background;
+        }
+        match rec.mat_ptr.as_ref() {
+            Some(p) => {
+                let mut attenuation = Vec3::default();
+                let mut scattered = Ray::new(Point3::default(), Vec3::default(), 0f64);
+                let emitted = p.emitted(rec.u, rec.v, &rec.point);
+                if !p.scatter(&r, &rec, &mut self.rng, &mut attenuation, &mut scattered) {
+                    return emitted;
                 }
-                None => {
-                    return Color::default();
-                }
+                return attenuation * self.ray_color(scattered, background, depth - 1) + emitted;
+            }
+            None => {
+                return Color::default();
             }
         }
-        let unit_direction = r.direction().unit();
-        let t = 0.5 * (unit_direction.y() + 1.0);
-        Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
     }
 }
 
@@ -64,6 +63,8 @@ impl Hittable for HittableList {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
                 rec.t = temp_rec.t;
+                rec.u = temp_rec.u;
+                rec.v = temp_rec.v;
                 rec.front_face = temp_rec.front_face;
                 rec.point = temp_rec.point;
                 rec.normal = temp_rec.normal;

@@ -6,7 +6,7 @@ use crate::{
     hittable::HitRecord,
     ray::Ray,
     texture::{SolidColor, Texture},
-    vec3::{dot, random_unit_sphere, reflect, refract, Color},
+    vec3::{dot, random_unit_sphere, reflect, refract, Color, Point3},
 };
 pub trait Scatter {
     fn scatter(
@@ -17,6 +17,9 @@ pub trait Scatter {
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool;
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+        Color::default()
+    }
 }
 
 pub trait CoScatter: Clone + Scatter {}
@@ -140,5 +143,37 @@ impl Scatter for Dielectric {
         *attenuation = Color::new(1.0, 1.0, 1.0);
         *scattered = Ray::new(rec.point, direction, r_in.time());
         true
+    }
+}
+
+pub struct DiffuseLight {
+    emit: Rc<dyn Texture>,
+}
+
+impl DiffuseLight {
+    pub fn from_texture(emit: Rc<dyn Texture>) -> Self {
+        Self { emit }
+    }
+
+    pub fn from_color(c: Color) -> Self {
+        Self {
+            emit: Rc::new(SolidColor::from_color(c)),
+        }
+    }
+}
+
+impl Scatter for DiffuseLight {
+    fn scatter(
+        &self,
+        _r_in: &Ray,
+        _rec: &HitRecord,
+        _rng: &mut ThreadRng,
+        _attenuation: &mut Color,
+        _scattered: &mut Ray,
+    ) -> bool {
+        false
+    }
+    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
+        self.emit.value(u, v, p)
     }
 }

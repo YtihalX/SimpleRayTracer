@@ -1,6 +1,7 @@
 use core::{fmt, panic};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Range, Sub, SubAssign};
 
+use image::Rgb;
 use rand::prelude::*;
 
 #[derive(PartialEq, Clone, Copy)]
@@ -34,6 +35,18 @@ impl Vec3 {
 
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { e: [x, y, z] }
+    }
+
+    pub fn from_rgb8(color: Rgb<u8>) -> Self {
+        const COLOR_SCALE: f64 = 1f64 / 255f64;
+        let tmp = color.0;
+        Self {
+            e: [
+                tmp[0] as f64 * COLOR_SCALE,
+                tmp[1] as f64 * COLOR_SCALE,
+                tmp[2] as f64 * COLOR_SCALE,
+            ],
+        }
     }
 
     pub fn unit(&self) -> Vec3 {
@@ -183,9 +196,9 @@ impl fmt::Display for Vec3 {
         write!(
             f,
             "{} {} {}",
-            (self.x() * 256.0) as u8,
-            (self.y() * 256.0) as u8,
-            (self.z() * 256.0) as u8
+            (self.x() * 255.999) as u8,
+            (self.y() * 255.999) as u8,
+            (self.z() * 255.999) as u8
         )
     }
 }

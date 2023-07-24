@@ -1,7 +1,10 @@
-use std::rc::Rc;
+use std::{path::Path, rc::Rc};
+
+use image::{ImageBuffer, Rgb};
 
 use crate::{
     perlin::Perlin,
+    rtw::clamp,
     vec3::{Color, Vec3},
 };
 
@@ -74,5 +77,39 @@ impl NoiseTexture {
 impl Texture for NoiseTexture {
     fn value(&self, _u: f64, _v: f64, p: &Vec3) -> Color {
         Color::new(1f64, 1f64, 1f64) * self.noise.noise(&(*p * self.scale))
+    }
+}
+
+pub struct ImageTexture {
+    data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+}
+
+impl ImageTexture {
+    pub fn new(file: &Path) -> Self {
+        let data = image::io::Reader::open(file)
+            .unwrap()
+            .decode()
+            .unwrap()
+            .into_rgb8();
+        Self { data }
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, u: f64, v: f64, _p: &Vec3) -> Color {
+        let u = clamp(u, 0f64, 1f64);
+        let v = 1f64 - clamp(v, 0f64, 1f64);
+        let width = self.data.width();
+        let height = self.data.height();
+        let mut i = (u * width as f64) as u32;
+        let mut j = (v * height as f64) as u32;
+        if i >= width {
+            i = width - 1
+        }
+        if j >= height {
+            j = height - 1
+        }
+        let a = Color::from_rgb8(*self.data.get_pixel(i, j));
+        a
     }
 }
