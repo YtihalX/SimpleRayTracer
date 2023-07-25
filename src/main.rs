@@ -2,6 +2,8 @@ use rand::Rng;
 use rtw::aarect::{XYRect, YZRect, ZXRect};
 use rtw::camera::Camera;
 use rtw::color::paint;
+use rtw::cube::Cube;
+use rtw::hittable::{RotateY, Translate};
 use rtw::hittable_list::HittableList;
 use rtw::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use rtw::sphere::Sphere;
@@ -18,7 +20,7 @@ use std::{
 const THREAD_NUM: usize = 16;
 
 fn main() -> std::io::Result<()> {
-    const IMAGE_WIDTH: usize = 400;
+    const IMAGE_WIDTH: usize = 920;
     const ASPECT_RATIO: f64 = 1f64;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     const TOT_SIZE: usize = 12 * IMAGE_HEIGHT * IMAGE_WIDTH + 20;
@@ -162,6 +164,25 @@ fn scene(case: u8) -> HittableList {
                 [0f64, 555f64],
                 555f64,
             )));
+
+            let box1 = Rc::new(Cube::new(
+                Point3::new(0f64, 0f64, 0f64),
+                Point3::new(165f64, 330f64, 165f64),
+                white.clone(),
+            ));
+            let box1 = Rc::new(RotateY::new(15f64, box1));
+            let box1 = Rc::new(Translate::new(Vec3::new(265f64, 0f64, 295f64), box1));
+            world.push(box1);
+
+            let box2 = Rc::new(Cube::new(
+                Point3::new(0f64, 0f64, 0f64),
+                Point3::new(165f64, 165f64, 165f64),
+                white.clone(),
+            ));
+            let box2 = Rc::new(RotateY::new(-18f64, box2));
+            let box2 = Rc::new(Translate::new(Vec3::new(130f64, 0f64, 65f64), box2));
+            world.push(box2);
+
             world
         }
         _ => {

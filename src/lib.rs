@@ -3,6 +3,8 @@ pub mod aarect;
 pub mod bvh;
 pub mod camera;
 pub mod color;
+pub mod constant_medium;
+pub mod cube;
 pub mod hittable;
 pub mod hittable_list;
 pub mod material;
