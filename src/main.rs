@@ -24,7 +24,7 @@ fn main() -> std::io::Result<()> {
     const ASPECT_RATIO: f64 = 1f64;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     const TOT_SIZE: usize = 12 * IMAGE_HEIGHT * IMAGE_WIDTH + 20;
-    const SAMPLES_PER_PIXEL: usize = 10000;
+    const SAMPLES_PER_PIXEL: usize = 100000;
     const MAX_DEPTH: usize = 50;
     const HPTHREAD: usize = IMAGE_HEIGHT / THREAD_NUM + 1;
 
